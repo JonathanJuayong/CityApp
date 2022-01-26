@@ -4,6 +4,7 @@ import de.ffuf.pass.common.handlers.PassDatabaseHandler
 import de.ffuf.pass.common.utilities.extensions.orElseThrow404
 import ffufm.jonathan.api.repositories.city.CityCityRepository
 import ffufm.jonathan.api.spec.dbo.city.CityCity
+import ffufm.jonathan.api.spec.dbo.city.CityCityDTO
 import ffufm.jonathan.api.spec.handler.city.CityCityDatabaseHandler
 import kotlin.Int
 import kotlin.Long
@@ -19,7 +20,7 @@ class CityCityHandlerImpl : PassDatabaseHandler<CityCity, CityCityRepository>(),
      * Create City: Creates a new City object
      * HTTP Code 201: The created City
      */
-    override suspend fun create(body: CityCity): CityCity {
+    override suspend fun create(body: CityCityDTO): CityCityDTO {
         TODO("not checked yet")
         return repository.save(body)
     }
@@ -29,7 +30,7 @@ class CityCityHandlerImpl : PassDatabaseHandler<CityCity, CityCityRepository>(),
      * Headers will include TotalElements, TotalPages, CurrentPage and PerPage to help with Pagination.
      * HTTP Code 200: List of Cities
      */
-    override suspend fun getAll(maxResults: Int = 100, page: Int = 0): Page<CityCity> {
+    override suspend fun getAll(maxResults: Int = 100, page: Int = 0): Page<CityCityDTO> {
         TODO("not checked yet")
         return repository.findAll(Pageable.unpaged())
     }
@@ -37,7 +38,7 @@ class CityCityHandlerImpl : PassDatabaseHandler<CityCity, CityCityRepository>(),
     /**
      * Delete City by id.: Deletes one specific City.
      */
-    override suspend fun remove(id: Long): CityCity {
+    override suspend fun remove(id: Long) {
         val original = repository.findById(id).orElseThrow404(id)
         TODO("not checked yet - update the values you really want updated")
         return repository.delete(original)
@@ -49,7 +50,7 @@ class CityCityHandlerImpl : PassDatabaseHandler<CityCity, CityCityRepository>(),
      * HTTP Code 404: The requested object could not be found by the submitted id.
      * HTTP Code 422: On or many fields contains a invalid value.
      */
-    override suspend fun update(body: CityCity, id: Long): CityCity {
+    override suspend fun update(body: CityCityDTO, id: Long): CityCityDTO {
         val original = repository.findById(id).orElseThrow404(id)
         TODO("not checked yet - update the values you really want updated")
         return repository.save(original)
