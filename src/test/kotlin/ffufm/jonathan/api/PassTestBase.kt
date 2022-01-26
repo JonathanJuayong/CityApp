@@ -2,6 +2,8 @@ package ffufm.jonathan.api
 
 import de.ffuf.pass.common.security.SpringContext
 import de.ffuf.pass.common.security.SpringSecurityAuditorAware
+import ffufm.jonathan.api.repositories.city.CityCityRepository
+import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,8 +21,17 @@ abstract class PassTestBase {
     @Autowired
     lateinit var context: ApplicationContext
 
+    @Autowired
+    lateinit var cityCityRepository: CityCityRepository
+
+
     @Before
     fun initializeContext() {
         SpringContext.context = context
+    }
+
+    @After
+    fun cleanRepositories(){
+        cityCityRepository.deleteAll()
     }
 }
