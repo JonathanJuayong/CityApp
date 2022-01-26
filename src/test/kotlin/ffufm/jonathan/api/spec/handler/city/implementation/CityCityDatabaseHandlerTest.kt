@@ -30,7 +30,7 @@ class CityCityDatabaseHandlerTest : PassTestBase() {
     fun `create should fail given duplicate city name`() = runBlocking {
         val city = cityCityRepository.save(EntityGenerator.createCity())
         val duplicateCity = city.copy(
-            temperature = "30°C"
+            name = "Manila"
         ).toDto()
 
         val exception = assertFailsWith<ResponseStatusException> {
@@ -42,33 +42,20 @@ class CityCityDatabaseHandlerTest : PassTestBase() {
     }
 
     @Test
-    fun `create should fail given duplicate country`() = runBlocking {
-        val city = cityCityRepository.save(EntityGenerator.createCity())
-        val duplicateCity = city.copy(
-            temperature = "30°C"
-        ).toDto()
-
-        val exception = assertFailsWith<ResponseStatusException> {
-            cityCityDatabaseHandler.create(duplicateCity)
-        }
-
-        val expectedException = "409 CONFLICT \"Country ${duplicateCity.country} already exists!\""
-        assertEquals(expectedException, exception.message)
-    }
-
-    @Test
-    fun `get all cities should return citiesl`() = runBlocking {
+    fun `get all cities should return cities`() = runBlocking {
         val body = EntityGenerator.createCity()
         cityCityRepository.saveAll(
             listOf(
                 body,
                 body.copy(
-                    name = "Manila"
+                    name = "Manila",
+                    country = "Philippines",
+                    temperature = "+29 °C"
                 )
             )
         )
-        val cities = cityCityDatabaseHandler.getAll(0, 100)
-        assertEquals(2, cities.count())
+        val cities = cityCityDatabaseHandler.getAll(100, 0)
+        assertEquals(2, cities.totalElements)
     }
 
     @Test
