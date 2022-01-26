@@ -1,55 +1,127 @@
 package ffufm.jonathan.api.spec.handler.city.implementation
 
 import ffufm.jonathan.api.PassTestBase
-import ffufm.jonathan.api.repositories.city.CityCityRepository
-import ffufm.jonathan.api.spec.dbo.city.CityCity
 import ffufm.jonathan.api.spec.handler.city.CityCityDatabaseHandler
+import ffufm.jonathan.api.spec.handler.city.utils.EntityGenerator
 import kotlinx.coroutines.runBlocking
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.server.ResponseStatusException
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class CityCityDatabaseHandlerTest : PassTestBase() {
     @Autowired
-    lateinit var cityCityRepository: CityCityRepository
-
-    @Autowired
     lateinit var cityCityDatabaseHandler: CityCityDatabaseHandler
 
-    @Before
-    @After
-    fun cleanRepositories() {
-        cityCityRepository.deleteAll()
+    @Test
+    fun `create should return city`() = runBlocking {
+        assertEquals(0, cityCityRepository.findAll().count())
+        val city = EntityGenerator.createCity().toDto()
+        val createdCity = cityCityDatabaseHandler.create(city)
+
+        assertEquals(1, cityCityRepository.findAll().count())
+        assertEquals(city.name, createdCity.name)
+        assertEquals(city.country, createdCity.country)
+        assertEquals(city.temperature, createdCity.temperature)
     }
 
     @Test
-    fun `test create`() = runBlocking {
-        val body: CityCity = CityCity()
-        cityCityDatabaseHandler.create(body)
-        Unit
+    fun `create should fail given duplicate city name`() = runBlocking {
+        val city = cityCityRepository.save(EntityGenerator.createCity())
+        val duplicateCity = city.copy(
+            temperature = "30°C"
+        ).toDto()
+
+        val exception = assertFailsWith<ResponseStatusException> {
+            cityCityDatabaseHandler.create(duplicateCity)
+        }
+
+        val expectedException = "409 CONFLICT \"City Name ${duplicateCity.name} already exists!\""
+        assertEquals(expectedException, exception.message)
     }
 
     @Test
-    fun `test getAll`() = runBlocking {
-        val maxResults: Int = 100
-        val page: Int = 0
-        cityCityDatabaseHandler.getAll(maxResults, page)
-        Unit
+    fun `create should fail given duplicate country`() = runBlocking {
+        val city = cityCityRepository.save(EntityGenerator.createCity())
+        val duplicateCity = city.copy(
+            temperature = "30°C"
+        ).toDto()
+
+        val exception = assertFailsWith<ResponseStatusException> {
+            cityCityDatabaseHandler.create(duplicateCity)
+        }
+
+        val expectedException = "409 CONFLICT \"Country ${duplicateCity.country} already exists!\""
+        assertEquals(expectedException, exception.message)
     }
 
     @Test
-    fun `test remove`() = runBlocking {
-        val id: Long = 0
-        cityCityDatabaseHandler.remove(id)
-        Unit
+    fun `get all cities should return citiesl`() = runBlocking {
+        val body = EntityGenerator.createCity()
+        cityCityRepository.saveAll(
+            listOf(
+                body,
+                body.copy(
+                    name = "Manila"
+                )
+            )
+        )
+        val cities = cityCityDatabaseHandler.getAll(0, 100)
+        assertEquals(2, cities.count())
     }
 
     @Test
-    fun `test update`() = runBlocking {
-        val body: CityCity = CityCity()
-        val id: Long = 0
-        cityCityDatabaseHandler.update(body, id)
-        Unit
+    fun `remove city should work`() = runBlocking {
+        val city = EntityGenerator.createCity()
+        val createdCity = cityCityRepository.save(city)
+
+        assertEquals(1, cityCityRepository.findAll().count())
+        cityCityDatabaseHandler.remove(createdCity.id!!)
+        assertEquals(0, cityCityRepository.findAll().count())
+    }
+
+    @Test
+    fun `remove city should fail given invalid cityId`() = runBlocking {
+        val invalidId : Long = 123
+        val exception = assertFailsWith<ResponseStatusException> {
+            cityCityDatabaseHandler.remove(invalidId)
+        }
+        val expectedException = "404 NOT_FOUND \"CityCity with ID $invalidId not found\""
+        assertEquals(expectedException, exception.message)
+    }
+
+    @Test
+    fun `update city should return updated city`() = runBlocking {
+        val city = EntityGenerator.createCity()
+        val original = cityCityRepository.save(city)
+
+        val body = original.copy(
+            name = "Manila",
+            country = "Philippines",
+            temperature = "30°C"
+        ).toDto()
+
+        val updatedCity = cityCityDatabaseHandler.update(body, original.id!!)
+        assertEquals(body.name, updatedCity.name)
+        assertEquals(body.country, updatedCity.country)
+        assertEquals(body.temperature, updatedCity.temperature)
+    }
+
+    @Test
+    fun `update should fail given invalid cityId`() = runBlocking {
+        val original = cityCityRepository.save(EntityGenerator.createCity())
+        val body = original.copy(
+            name = "Manila",
+            country = "Philippines",
+            temperature = "30°C"
+        )
+
+        val id : Long = 123
+        val exception = assertFailsWith<ResponseStatusException> {
+            cityCityDatabaseHandler.update(body.toDto(), id)
+        }
+        val expectedException = "404 NOT_FOUND \"CityCity with ID $id not found\""
+        assertEquals(expectedException, exception.message)
     }
 }
