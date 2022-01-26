@@ -19,8 +19,6 @@ import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
 
 class CityCityHandlerTest : PassTestBase() {
-    @Autowired
-    private lateinit var cityCityRepository: CityCityRepository
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
@@ -28,65 +26,114 @@ class CityCityHandlerTest : PassTestBase() {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    @Before
-    @After
-    fun cleanRepositories() {
-        cityCityRepository.deleteAll()
+
+
+    @Test
+    @WithMockUser
+    fun `test create city should return 200`() {
+        val body = EntityGenerator.createCity()
+
+        mockMvc.post("/cities/") {
+            accept(MediaType.APPLICATION_JSON)
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(body)
+        }.andExpect {
+            status { isOk() }
+
+        }
     }
 
     @Test
     @WithMockUser
-    fun `test create`() {
-        val body: CityCity = CityCity()
-                mockMvc.post("/cities/") {
-                    accept(MediaType.APPLICATION_JSON)
-                    contentType = MediaType.APPLICATION_JSON
-                    content = objectMapper.writeValueAsString(body)
-                }.andExpect {
-                    status { isOk }
-                    
-                }
-    }
+    fun `create city should return 409 if duplicate city`() {
+        cityCityRepository.save(EntityGenerator.createCity())
 
+        val body = EntityGenerator.createEmployee()
+
+        mockMvc.post("/cities/") {
+            accept(MediaType.APPLICATION_JSON)
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(body)
+        }.asyncDispatch().andExpect {
+            status { isConflict() }
+        }
+    }
     @Test
     @WithMockUser
     fun `test getAll`() {
-                mockMvc.get("/cities/") {
-                    accept(MediaType.APPLICATION_JSON)
-                    contentType = MediaType.APPLICATION_JSON
-                    
-                }.andExpect {
-                    status { isOk }
-                    
-                }
+        val user = cityCityRepository.save(EntityGenerator.createCity())
+
+        mockMvc.get("/cities/") {
+            accept(MediaType.APPLICATION_JSON)
+            contentType = MediaType.APPLICATION_JSON
+
+        }.andExpect {
+            status { isOk() }
+
+        }
     }
 
     @Test
     @WithMockUser
-    fun `test remove`() {
-        val id: Long = 0
-                mockMvc.delete("/cities/{id}/", id) {
-                    accept(MediaType.APPLICATION_JSON)
-                    contentType = MediaType.APPLICATION_JSON
-                    
-                }.andExpect {
-                    status { isOk }
-                    
-                }
+    fun `test remove should return 200`() {
+
+        val savedUser = cityCityRepository.save(EntityGenerator.createCity())
+
+        mockMvc.delete("/cities/{id}/", savedUser.id!!) {
+            accept(MediaType.APPLICATION_JSON)
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+
+        }
+    }
+    @Test
+    @WithMockUser
+    fun `test remove should return 400`() {
+
+        val savedUser = cityCityRepository.save(EntityGenerator.createCity())
+
+        mockMvc.delete("/cities/{id}/", 3) {
+            accept(MediaType.APPLICATION_JSON)
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isBadRequest() }
+
+        }
+    }
+    @Test
+    @WithMockUser
+    fun `test update should return 200`() {
+        val savedCity = cityCityRepository.save(EntityGenerator.createCity())
+        val body = savedCity.copy(
+            name = "Tokyo",
+            country = "Japan"
+        )
+        mockMvc.put("/cities/{id}/", savedCity.id) {
+            accept(MediaType.APPLICATION_JSON)
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(body)
+        }.andExpect {
+            status { isOk() }
+
+        }
     }
 
     @Test
     @WithMockUser
-    fun `test update`() {
-        val body: CityCity = CityCity()
-        val id: Long = 0
-                mockMvc.put("/cities/{id}/", id) {
-                    accept(MediaType.APPLICATION_JSON)
-                    contentType = MediaType.APPLICATION_JSON
-                    content = objectMapper.writeValueAsString(body)
-                }.andExpect {
-                    status { isOk }
-                    
-                }
+    fun `test update should return 400 if the id is not exist`() {
+        val savedCity = cityCityRepository.save(EntityGenerator.createCity())
+        val body = savedCity.copy(
+            name = "Tokyo",
+            country = "Japan"
+        )
+        mockMvc.put("/cities/{id}/", 3) {
+            accept(MediaType.APPLICATION_JSON)
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(body)
+        }.andExpect {
+            status { isOk() }
+
+        }
     }
 }
