@@ -16,7 +16,7 @@ class WeatherService {
             .build()
 
 
-    suspend fun getWeather(cityName: String): String {
+    suspend fun getWeather(cityName: String): Any {
         val client = initializeApiClient(Constants.WEATHER_URL)
         return client.get()
             .uri { builder ->
