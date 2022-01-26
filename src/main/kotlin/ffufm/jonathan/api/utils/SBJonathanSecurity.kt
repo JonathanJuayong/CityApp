@@ -14,7 +14,7 @@ class SBJonathanSecurity : WebSecurityConfigurerAdapter() {
                  http
                     .authorizeRequests {
                         it.antMatchers("/actuator/**").permitAll()
-                        it.anyRequest().authenticated()
+                        it.anyRequest().permitAll()
                     }
                     .also {
                         it.cors().disable().csrf().disable()
