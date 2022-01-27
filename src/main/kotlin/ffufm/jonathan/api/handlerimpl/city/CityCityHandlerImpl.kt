@@ -11,7 +11,9 @@ import ffufm.jonathan.api.spec.dbo.city.CityCityDTO
 import ffufm.jonathan.api.spec.handler.city.CityCityDatabaseHandler
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import org.springframework.web.server.ResponseStatusException
 
 @Component("city.CityCityHandler")
 class CityCityHandlerImpl(
@@ -25,6 +27,13 @@ class CityCityHandlerImpl(
      */
     override suspend fun create(body: CityCityDTO): CityCityDTO {
         val weather = weatherService.getWeather(body.name ?: "")
+
+        if (repository.isCityDuplicated(body.name ?: "")) {
+            throw ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "City Name ${body.name} already exists!"
+            )
+        }
 
         val weatherJsonString = objectMapper.writeValueAsString(weather)
         val jsonNode = objectMapper.readTree(weatherJsonString)

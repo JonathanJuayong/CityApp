@@ -30,7 +30,7 @@ class CityCityHandlerTest : PassTestBase() {
             accept(MediaType.APPLICATION_JSON)
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(body)
-        }.andExpect {
+        }.asyncDispatch().andExpect {
             status { isOk() }
 
         }
@@ -59,7 +59,7 @@ class CityCityHandlerTest : PassTestBase() {
             accept(MediaType.APPLICATION_JSON)
             contentType = MediaType.APPLICATION_JSON
 
-        }.andExpect {
+        }.asyncDispatch().andExpect {
             status { isOk() }
 
         }
@@ -74,7 +74,7 @@ class CityCityHandlerTest : PassTestBase() {
         mockMvc.delete("/cities/{id}/", savedUser.id!!) {
             accept(MediaType.APPLICATION_JSON)
             contentType = MediaType.APPLICATION_JSON
-        }.andExpect {
+        }.asyncDispatch().andExpect {
             status { isOk() }
 
         }
@@ -106,7 +106,7 @@ class CityCityHandlerTest : PassTestBase() {
             accept(MediaType.APPLICATION_JSON)
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(body)
-        }.andExpect {
+        }.asyncDispatch().andExpect {
             status { isOk() }
 
         }
@@ -124,8 +124,8 @@ class CityCityHandlerTest : PassTestBase() {
             accept(MediaType.APPLICATION_JSON)
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(body)
-        }.andExpect {
-            status { isOk() }
+        }.asyncDispatch().andExpect {
+            status { isNotFound() }
 
         }
     }
