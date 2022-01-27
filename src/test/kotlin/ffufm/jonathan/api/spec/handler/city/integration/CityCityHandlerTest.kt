@@ -2,16 +2,8 @@ package ffufm.jonathan.api.spec.handler.city.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import ffufm.jonathan.api.PassTestBase
-import ffufm.jonathan.api.repositories.city.CityCityRepository
-import ffufm.jonathan.api.spec.dbo.city.CityCity
-import ffufm.jonathan.api.spec.handler.city.CityCityDatabaseHandler
-import ffufm.jonathan.api.spec.handler.city.utils.EntityGenerator
-import org.hamcrest.CoreMatchers
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
@@ -19,6 +11,7 @@ import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
+import ffufm.jonathan.api.spec.handler.city.utils.EntityGenerator
 
 class CityCityHandlerTest : PassTestBase() {
 
@@ -47,7 +40,6 @@ class CityCityHandlerTest : PassTestBase() {
     @WithMockUser
     fun `create city should return 409 if duplicate city`() {
         cityCityRepository.save(EntityGenerator.createCity())
-        println(cityCityRepository.count())
         val body = EntityGenerator.createCity()
 
         mockMvc.post("/cities/") {

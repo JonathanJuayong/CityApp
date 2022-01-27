@@ -6,6 +6,6 @@ object EntityGenerator {
     fun createCity(): CityCity = CityCity(
         name = "Manila",
         country = "Philippines",
-        temperature = "30°C"
+        temperature = "+29 °C"
     )
 }
