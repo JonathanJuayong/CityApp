@@ -23,7 +23,6 @@ class CityCityDatabaseHandlerTest : PassTestBase() {
         assertEquals(1, cityCityRepository.findAll().count())
         assertEquals(city.name, createdCity.name)
         assertEquals(city.country, createdCity.country)
-        assertEquals(city.temperature, createdCity.temperature)
     }
 
     @Test
