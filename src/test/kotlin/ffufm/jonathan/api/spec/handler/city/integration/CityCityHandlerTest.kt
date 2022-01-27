@@ -21,8 +21,6 @@ class CityCityHandlerTest : PassTestBase() {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-
-
     @Test
     @WithMockUser
     fun `test create city should return 200`() {
@@ -42,7 +40,6 @@ class CityCityHandlerTest : PassTestBase() {
     @WithMockUser
     fun `create city should return 409 if duplicate city`() {
         cityCityRepository.save(EntityGenerator.createCity())
-
         val body = EntityGenerator.createCity()
 
         mockMvc.post("/cities/") {
@@ -55,7 +52,7 @@ class CityCityHandlerTest : PassTestBase() {
     }
     @Test
     @WithMockUser
-    fun `test getAll`() {
+    fun `test getAll the cities`() {
         val user = cityCityRepository.save(EntityGenerator.createCity())
 
         mockMvc.get("/cities/") {
@@ -84,15 +81,16 @@ class CityCityHandlerTest : PassTestBase() {
     }
     @Test
     @WithMockUser
-    fun `test remove should return 400`() {
+    fun `test remove should failed if the id is not found`() {
 
-        val savedUser = cityCityRepository.save(EntityGenerator.createCity())
+         cityCityRepository.save(EntityGenerator.createCity())
+        val id: Long = 143
 
-        mockMvc.delete("/cities/{id}/", 3) {
+        mockMvc.delete("/cities/${id}/") {
             accept(MediaType.APPLICATION_JSON)
             contentType = MediaType.APPLICATION_JSON
-        }.andExpect {
-            status { isBadRequest() }
+        }.asyncDispatch().andExpect {
+            status { isNotFound() }
 
         }
     }
